@@ -1,0 +1,145 @@
+$Header: /usr/local/PPS_RCS/src/INSTALL,v 1.2 2000/04/13 00:49:12 paul Exp $
+
+
+PPS Printing System
+
+Copyright (c) 1997-1999 Paul Grebenc.
+
+-------------------------------------------------------------------------------
+
+The PPS printing system is a print spooling system whose main advantage
+at this point is its page accounting ability.  While many features may still
+be desirable, this system, combined with Samba, provides an excellent means
+of providing a page accounting system for Windows 95 clients in a network.
+It was developed to be used in the Faculty of Education at Brock University,
+St. Catharines, Canada, where it has been in use since the summer of 1998.
+
+-------------------------------------------------------------------------------
+
+REQUIREMENTS:
+
+In order to install and run this system, you must already have Mini SQL
+installed and running on your server.  A copy of Mini SQL, and instructions
+regarding its installation, can be found at http://www.hughes.com.au.
+Additionally, an HTTP server must be running, locally at least, on the server
+on which the PPS system is installed, in order to provide for the
+administration utilities.  The free Apache HTTP server can be found at
+http://www.apache.org.
+
+-------------------------------------------------------------------------------
+
+INSTRUCTIONS FOR THE IMPATIENT:
+------------------------------
+
+Type:
+
+configure
+make
+make install
+make database
+make installman
+
+Set up your web server so that you can access the web_bin directory installed
+under the PPS root directory with cgi-bin capability.
+
+-------------------------------------------------------------------------------
+
+INSTRUCTIONS FOR THE PATIENT:
+----------------------------
+
+
+CONFIGURATION:
+
+In order to build a Makefile and config.h for your system, execute the
+following command:
+
+./configure
+
+You may optionally specify a --prefix=<path> option to configure, if you wish
+to install this system in some root directory other than /usr/local/pps.
+
+After the configure script has successfully completed, you SHOULD THEN EXAMINE
+THE Makefile TO MAKE ANY CHANGES WHICH MIGHT BE NECESSARY.  These options are
+described in the Makefile.
+
+Optionally, values affecting limits imposed on the system which can be
+configured are in the file pps.h.  You may change the following options:
+
+- The MAX_QUEUES and MAX_PRINTERS_PER_QUEUE values should be set appropriately
+  based on the requirements for the site at which the system is installed.
+  Setting these values higher than necessary does no harm, other than using a
+  small amount of memory.
+
+- The QUEUE_LENGTH value should be set to the maximum number of jobs that can
+  be stored in each queue at one time.  This number could be kept small or
+  large, depending on whether one wants the possibility of a huge backlog of
+  jobs in a queue should someone turn a printer off, or should it run out of
+  paper, etc.
+
+
+COMPILING:
+
+Simply type "make" to build the executables.
+
+
+INSTALLING:
+
+As root, type:
+
+make install		(install executables in the system)
+make database		(create the PPS database in mSQL)
+make installman		(install man pages in the system)
+
+Next, configure your HTTP server.  For the Apache HTTP server, do either of
+the following:
+
+1. Configure the server to enable the FollowSymLinks in the root (htdocs)
+   directory.  Set the symbolic link from htdocs/pps to the web_bin directory
+   of the PPS installation.  (ie. htdocs/pps -> /usr/local/pps/web_bin)
+
+2. a) Add an entry for the web_bin directory to access.conf, such as the
+      following (this example includes password protection; you will have to
+      create your own .htpasswd file if you require authorization):
+
+	<Directory /usr/local/pps/web_bin>
+	AllowOverride None
+	Options Indexes FollowSymLinks ExecCGI
+
+	AuthUserFile /usr/local/pps/web_bin/.htpasswd
+	AuthGroupFile /dev/null
+	AuthName Printing_Administration
+	AuthType Basic
+
+	<Limit GET>
+	require valid-user
+	order deny,allow
+	deny from all
+	allow from .our-domain.net
+	</Limit>
+
+	</Directory>
+
+   b) Create an alias for the PPS administration utilities in the srm.conf
+      file:
+
+	Alias /pps  /usr/local/pps/web_bin
+
+   c) Uncomment, or create, the following line in httpd.conf:
+
+	AddHandler cgi-script .cgi
+
+3. Configure a link to web_user as above, but without password protection.
+
+
+RUNNING / CONFIGURING / ADMINISTERING:
+
+Execute the ppd daemon as root.  Usually, you will want to have the daemon
+start up each time the system is brought up, and so you should put in your
+/etc/rc.d/rc.local file, or equivalent.  (Start it as a background process)
+
+Use any system on your network with an HTTP client (web browser) to access the
+administration interface.  Simply view http://site.your-domain.net/pps, if
+you have configured your http daemon as described above.  Add, remove and
+configure users, queues and printers through this interface.  Note, the
+daemon need not be restarted after changes are made through this interface.
+

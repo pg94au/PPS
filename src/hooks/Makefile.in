@@ -1,0 +1,18 @@
+# $Header: /usr/local/PPS_RCS/src/hooks/Makefile.in,v 1.1 1999/12/10 03:36:44 paul Exp $
+
+CC = @CC@
+LIBS = @LIBS@
+LDFLAGS = @LDFLAGS@
+
+CFLAGS = -O -I.. @MSQL_H_PATH@ @DEFS@
+
+all : add_user
+
+add_user : add_user.o ../msql/database.o
+	$(CC) -o add_user $(LDFLAGS) add_user.o ../msql/database.o $(LIBS)
+
+../msql/database.o : ../msql/database.c
+
+clean :
+	-rm add_user add_user.o
+

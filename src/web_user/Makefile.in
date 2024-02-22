@@ -1,0 +1,23 @@
+# $Header: /usr/local/PPS_RCS/src/web_user/Makefile.in,v 1.1 1999/12/10 03:24:10 paul Exp $
+
+CC = @CC@
+LIBS = @LIBS@
+LDFLAGS = @LDFLAGS@
+
+CFLAGS = -O -I.. -I../msql @MSQL_H_PATH@ @DEFS@ -DROOT=\"@prefix@\"
+
+all : user_request.cgi
+
+user_request.cgi: user_interface.o show_balance.o show_history.o ../msql/database.o ../web/parse.o
+	$(CC) -o user_request.cgi $(LDFLAGS) user_interface.o show_balance.o show_history.o ../msql/database.o ../web/parse.o $(LIBS)
+
+user_interface.o : user_interface.c ../pps.h
+show_balance.o : show_balance.c ../pps.h
+show_history.o : show_history.c ../pps.h
+
+../msql/database.o : ../msql/database.c
+parse.o : parse.c
+
+clean :
+	-rm user_request.cgi user_interface.o show_balance.o show_history.o
+

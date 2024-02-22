@@ -1,0 +1,30 @@
+/* $Header: /usr/local/PPS_RCS/src/config.h.in,v 1.3 2000/08/11 22:59:47 paul Exp $ */
+
+/* Define if you have the crypt library (-lcrypt).  */
+#undef HAVE_LIBCRYPT
+#undef HAVE_CRYPT_H
+
+/* Define depending on where wait.h is */
+#undef HAVE_WAIT_H
+#undef HAVE_SYS_WAIT_H
+
+/* Define if you have the xnet library (-lxnet).  */
+#undef HAVE_LIBXNET
+
+/* Define if you have the msql library (-lmsql).  */
+#undef HAVE_LIBMSQL
+
+/* Define if you have the gen library (-lgen).  */
+#undef HAVE_LIBGEN_H
+#undef HAVE_LIBGEN
+
+/* Define depending on whether you use fstatfs() or fstatvfs(). */
+#undef HAVE_SYS_VFS_H
+#undef HAVE_SYS_STATVFS_H
+
+#undef HAVE_FSTATFS
+#undef HAVE_FSTATVFS
+
+#undef HAVE_STATFS_IN_VFS_H
+#undef HAVE_STATVFS_IN_STATVFS_H
+

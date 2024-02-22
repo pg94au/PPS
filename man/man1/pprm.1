@@ -1,0 +1,61 @@
+.TH PPRM 1 "29 Sep 1998" "PPS Reference Manual" "PPS Reference Manual"
+.SH NAME
+pprm \- remove jobs from the print spooler
+.SH SYNOPSIS
+.B pprm
+.BI \-[qP] queue
+.B -
+|
+.I "job # ..."\c
+.SH DESCRIPTION
+.B Pprm
+is the client portion of the PPS Printing System which is used to remove
+jobs which have been submitted to the
+.BR ppd (8)
+print spooling daemon.
+
+Normally, users can only delete the jobs which they themselves have submitted.
+The exceptions are root, and members of the PPS operators group.
+.SH OPTIONS
+.TP
+.BI -[qP] queue
+The name of the queue from which the job(s) are to be removed.  The
+.B \-q
+switch is the one intended for this argument, but
+.B \-P
+can be used equivalently, for a more BSD-like interface.
+.TP
+.I job #
+Job numbers given as arguments specify which jobs to remove from the queue.
+More than one job number may be specified in order to remove multiple jobs
+at once. 
+.TP
+.B -
+If a single dash is given in place of a list of jobs to be deleted, then all
+jobs which can be removed by the user issuing the command will be removed.
+If root or an operator issue this command with the dash, the queue will be
+emptied of all waiting jobs.
+.SH LIMITATIONS
+The major limitation on
+.B pprm
+is that it cannot remove a job while it is currently being printed.
+The only way to remove a printing job is to cancel it at the printer via its
+own control panel (ie. the Cancel button on a LaserJet 5 series printer).  The
+reason for this limitation is the lack of available documentation on the PML
+printer language supported by Hewlett Packard.  Calls to HP in an attempt to
+gain access to someone with any information have been quite unsuccessful as
+of this point.
+
+Additionally, although
+.B pprm
+is not intended to duplicate all of the functionality of
+.BR lprm (1)\c
+, one more of its features would be desirable.  That is the ability to specify
+a user argument, so that either root or operator could easily clear the queue
+only of all jobs sent by one particular user without having to individually
+specify them.
+.SH AUTHOR
+Paul Grebenc <paul@ed.brocku.ca>
+.SH "SEE ALSO"
+ppr(1), ppq(1), ppd(8)
+

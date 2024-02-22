@@ -1,0 +1,58 @@
+# $Header: /usr/local/PPS_RCS/src/web/Makefile.in,v 1.1 1999/12/10 03:33:43 paul Exp $
+
+CC = @CC@
+LIBS = @LIBS@
+LDFLAGS = @LDFLAGS@
+
+CFLAGS = -O -I.. -I../msql @MSQL_H_PATH@ @DEFS@ -DROOT=\"@prefix@\"
+
+all : show_setup.cgi show_queue.cgi show_printer.cgi update_queue.cgi add_queue.cgi continue_add_queue.cgi add_printer.cgi continue_add_printer.cgi user_menu.cgi add_user.cgi continue_add_user.cgi show_user.cgi update_user.cgi
+	cd pjl_jetdirect; make
+
+show_setup.cgi : show_setup.o ../msql/database.o
+	$(CC) -o show_setup.cgi $(LDFLAGS) show_setup.o ../msql/database.o $(LIBS)
+show_queue.cgi : show_queue.o ../msql/database.o ../notify.o parse.o
+	$(CC) -o show_queue.cgi $(LDFLAGS) show_queue.o ../msql/database.o ../locking.o ../notify.o parse.o $(LIBS)
+show_printer.cgi : show_printer.o ../msql/database.o ../notify.o parse.o
+	$(CC) -o show_printer.cgi $(LDFLAGS) show_printer.o ../msql/database.o ../locking.o ../notify.o parse.o $(LIBS)
+update_queue.cgi : update_queue.o ../msql/database.o ../notify.o parse.o
+	$(CC) -o update_queue.cgi $(LDFLAGS) update_queue.o ../msql/database.o ../locking.o ../notify.o parse.o $(LIBS)
+add_queue.cgi : add_queue.o
+	$(CC) -o add_queue.cgi add_queue.o
+continue_add_queue.cgi : continue_add_queue.o ../msql/database.o ../locking.o ../notify.o parse.o
+	$(CC) -o continue_add_queue.cgi $(LDFLAGS) continue_add_queue.o ../msql/database.o ../locking.o ../notify.o parse.o $(LIBS)
+add_printer.cgi : add_printer.o ../msql/database.o parse.o
+	$(CC) -o add_printer.cgi add_printer.o $(LDFLAGS) ../msql/database.o parse.o $(LIBS)
+continue_add_printer.cgi : continue_add_printer.o ../msql/database.o parse.o
+	$(CC) -o continue_add_printer.cgi $(LDFLAGS) continue_add_printer.o ../msql/database.o parse.o $(LIBS)
+
+user_menu.cgi : user_menu.o ../msql/database.o
+	$(CC) -o user_menu.cgi $(LDFLAGS) user_menu.o ../msql/database.o $(LIBS)
+add_user.cgi : add_user.o ../msql/database.o parse.o
+	$(CC) -o add_user.cgi $(LDFLAGS) add_user.o ../msql/database.o parse.o $(LIBS)
+continue_add_user.cgi : continue_add_user.o ../msql/database.o parse.o
+	$(CC) -o continue_add_user.cgi $(LDFLAGS) continue_add_user.o ../msql/database.o parse.o $(LIBS)
+show_user.cgi : show_user.o ../msql/database.o parse.o
+	$(CC) -o show_user.cgi $(LDFLAGS) show_user.o ../msql/database.o parse.o $(LIBS)
+update_user.cgi : update_user.o ../msql/database.o ../logging.o parse.o
+	$(CC) -o update_user.cgi $(LDFLAGS) update_user.o ../msql/database.o ../logging.o ../locking.o parse.o $(LIBS)
+
+show_setup.o : show_setup.c ../pps.h
+show_queue.o : show_queue.c ../pps.h
+show_printer.o : show_printer.c ../pps.h
+update_queue.o : update_queue.c ../pps.h
+add_queue.o : add_queue.c ../pps.h
+continue_add_queue.o : continue_add_queue.c ../pps.h
+add_printer.o : add_printer.c ../pps.h
+continue_add_printer.o : continue_add_printer.c ../pps.h
+user_menu.o : user_menu.c ../pps.h
+add_user.o : add_user.c ../pps.h
+continue_add_user.o : continue_add_user.c ../pps.h
+show_user.o : show_user.c ../pps.h
+
+../msql/database.o : ../msql/database.c
+parse.o : parse.c
+
+clean :
+	-rm *.cgi *.o
+	-cd pjl_jetdirect; make clean

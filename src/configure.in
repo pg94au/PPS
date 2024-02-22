@@ -1,0 +1,223 @@
+dnl $Header: /usr/local/PPS_RCS/src/configure.in,v 1.3 2000/08/11 23:00:19 paul Exp $
+
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(web_user/show_balance.c)
+
+AC_PREFIX_DEFAULT(/usr/local/pps)
+mandir=/usr/local/man
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_MAKE_SET
+AC_PROG_INSTALL
+
+dnl Checks for libraries.
+
+dnl ----------------------------
+dnl -- CHECK WHERE connect IS --
+dnl ----------------------------
+
+AC_CHECK_FUNC(connect, need_connect=no, need_connect=yes)
+
+if test "$need_connect" = yes; then
+	AC_CHECK_LIB(xnet, connect)
+fi
+
+
+dnl --------------------------
+dnl -- CHECK WHERE crypt IS --
+dnl --------------------------
+
+AC_CHECK_HEADERS(crypt.h)
+
+AC_CHECK_FUNC(crypt, need_libcrypt=no, need_libcrypt=yes)
+
+if test "$need_libcrypt" = yes; then
+	AC_CHECK_LIB(crypt, crypt)
+fi
+
+
+dnl ---------------------------
+dnl -- CHECK WHERE wait.h IS --
+dnl ---------------------------
+
+AC_CHECK_HEADERS(wait.h)
+AC_CHECK_HEADERS(sys/wait.h)
+
+
+dnl -----------------------------
+dnl -- CHECK WHERE getspnam IS --
+dnl -----------------------------
+
+AC_CHECK_FUNC(getspnam, needlibsec=no, need_libsec=yes)
+
+if test "$need_libsec" = yes; then
+	AC_CHECK_LIB(sec, getspnam)
+fi
+
+
+dnl ---------------------------
+dnl -- FIND MINI SQL LIBRARY --
+dnl ---------------------------
+
+pps_have_msql=no
+AC_CHECK_LIB(msql, msqlConnect, pps_have_msql=yes, , $LIBS)
+
+if test "$pps_have_msql" = yes; then
+	AC_DEFINE(HAVE_LIBMSQL)
+	LIBS="$LIBS -lmsql"
+else	
+	AC_PATH_PROG(msql_path, libmsql.a, no, /usr/local/Hughes/lib:/usr/local/msql/lib:./lib:$HOME/lib)
+
+	if test "$msql_path" = "no"; then
+		AC_MSG_ERROR([cannot find required MiniSQL library - libmsql.a - try putting it in /lib or ./lib])
+	else
+		AC_DEFINE(HAVE_LIBMSQL)
+		LIBS="$LIBS -lmsql"
+
+		if test "$msql_path" = "/usr/local/Hughes/lib/libmsql.a"; then
+			LDFLAGS="$LDFLAGS -L/usr/local/Hughes/lib"
+		elif test "$msql_path" = "/usr/local/msql/lib/libmsql.a"; then
+			LDFLAGS="$LDFLAGS -L/usr/local/msql/lib"
+		elif test "$msql_path" = "./lib/libmsql.a"; then
+			LDFLAGS="$LDFLAGS -L./lib"
+		elif test "$msql_path" = "$HOME/lib/libmsql.a"; then
+			LDFLAGS="$LDFLAGS -L$HOME/lib"
+		fi
+	fi
+fi
+
+
+dnl -----------------
+dnl -- FIND msql.h --
+dnl -----------------
+
+pps_have_msql_h=no
+AC_CHECK_HEADER(msql.h, pps_have_msql_h=yes)
+
+if test "$pps_have_msql_h" = yes; then
+	MSQL_H_PATH=
+else
+	AC_PATH_PROG(MSQL_H_PATH, msql.h, no, /usr/local/Hughes/include:/usr/local/msql/include:./include:$HOME/include)
+
+	if test "$MSQL_H_PATH" = "no"; then
+		AC_MSG_ERROR([cannot find required MiniSQL header file - msql.h - try putting it in /usr/include or ./include])
+	elif test "$MSQL_H_PATH" = "/usr/local/Hughes/include/msql.h"; then
+		MSQL_H_PATH="-I/usr/local/Hughes/include"
+	elif test "$MSQL_H_PATH" = "/usr/local/msql/include/msql.h"; then
+		MSQL_H_PATH="-I/usr/local/msql/include"
+	elif test "$MSQL_H_PATH" = "./include/msql.h"; then
+		MSQL_H_PATH="-I./include"
+	elif test "$MSQL_H_PATH" = "$HOME/include/msql.h"; then
+		MSQL_H_PATH="-I$HOME/include"
+	fi
+fi
+
+AC_SUBST(MSQL_H_PATH)
+
+
+dnl -----------------------------
+dnl -- FIND msql AND msqladmin --
+dnl -----------------------------
+
+AC_PATH_PROG(MSQLPROG, msql, no, /usr/local/Hughes/bin:/usr/local/msql/bin:./bin:$HOME/bin)
+if test "$MSQLPROG" = "no"; then
+	AC_MSG_WARN([you will not be able to do a 'make database' without msql - try installing it in /usr/local/Hughes/bin])
+fi
+AC_SUBST(MSQLPROG)
+
+if test "$MSQLPROG" != "no"; then
+	AC_PATH_PROG(MSQLADMIN, msqladmin, no, /usr/local/Hughes/bin:/usr/local/msql/bin:./bin:$HOME/bin)
+
+	if test "$MSQLADMIN" = "no"; then
+		AC_MSG_WARN([you will not be able to do a 'make database' without msqladmin - try installing it in /usr/local/Hughes/bin])
+	fi
+fi
+AC_SUBST(MSQLADMIN)
+
+MAKE_DATABASE="echo \"You cannot create the database without msql and msqladmin.\"; false"
+if test "$MSQLPROG" != "no"; then
+	if test "$MSQLADMIN" != "no"; then
+		MAKE_DATABASE="true"
+	fi
+fi
+AC_SUBST(MAKE_DATABASE)
+
+
+dnl ---------------------
+dnl -- LOOK FOR mkdirp --
+dnl ---------------------
+
+AC_CHECK_FUNC(mkdirp, need_libgen=no, need_libgen=yes)
+if test "$need_libgen" = "yes"; then
+      AC_CHECK_LIB(gen, mkdirp, have_gen=yes, have_gen=no)
+      if test "$have_gen" = "yes"; then
+              AC_DEFINE(HAVE_LIBGEN)
+              LIBS="$LIBS -lgen"
+      fi
+else
+      dnl -- mkdirp is available and we don't need to link with libgen --
+      have_gen="yes"
+      AC_DEFINE(HAVE_MKDIRP)
+      AC_DEFINE(HAVE_LIBGEN)
+      LIBS="$LIBS -lgen"
+fi
+
+if test "$have_gen" = "yes"; then
+      have_mkdirp=no
+      AC_CHECK_HEADERS(libgen.h)
+fi
+
+
+dnl ------------------------------
+dnl -- FIND fstatfs OR fstatvfs --
+dnl ------------------------------
+
+have_fstatfs=no
+AC_CHECK_HEADERS(sys/vfs.h, have_sysvfsh=yes)
+
+if test "$have_sysvfsh" = yes; then
+	AC_DEFINE(HAVE_SYS_VFS_H)
+
+	AC_MSG_CHECKING(for struct statfs in sys/vfs.h)
+	AC_EGREP_HEADER(struct statfs, sys/vfs.h, have_statfs_in_sys_vfs_h=yes)
+	if test "$have_statfs_in_sys_vfs_h" = yes; then
+		AC_MSG_RESULT(yes)
+		AC_DEFINE(HAVE_STATFS_IN_VFS_H)
+		AC_CHECK_FUNC(fstatfs, have_fstatfs=yes)
+
+		if test "$have_fstatfs" = yes; then
+			AC_DEFINE(HAVE_FSTATFS)
+		fi
+	else
+		AC_MSG_RESULT(no)
+	fi
+fi
+
+if test "$have_fstatfs" = no; then
+	AC_CHECK_HEADERS(sys/statvfs.h, have_sysstatvfsh=yes)
+
+	if test "$have_sysstatvfsh" = yes; then
+		AC_DEFINE(HAVE_SYS_STATVFS_H)
+
+		AC_MSG_CHECKING(for struct statvfs in sys/statvfs.h)
+		AC_EGREP_HEADER(struct statvfs, sys/statvfs.h, have_statvfs_in_sys_statvfs_h=yes)
+		if test "$have_statvfs_in_sys_statvfs_h" = yes; then
+			AC_MSG_RESULT(yes)
+			AC_DEFINE(HAVE_STATVFS_IN_STATVFS_H)
+			AC_CHECK_FUNC(fstatvfs, have_fstatvfs=yes)
+
+			if test "$have_fstatvfs" = yes; then
+				AC_DEFINE(HAVE_FSTATVFS)
+			fi
+		else
+			AC_MSG_RESULT(no)
+		fi
+	else
+		AC_MSG_WARN([without fstatfs or fstatvfs, will not be able to check disk usage])
+	fi
+fi
+
+
+AC_CONFIG_HEADER(config.h)
+AC_OUTPUT(hooks/Makefile web_user/Makefile web/Makefile web/pjl_jetdirect/Makefile Makefile)

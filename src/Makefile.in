@@ -1,0 +1,190 @@
+# $Header: /usr/local/PPS_RCS/src/Makefile.in,v 1.3 2000/08/11 23:59:39 paul Exp $
+
+##############################
+# USER DEFINABLE SETTINGS HERE
+
+# Set the user and group id that the daemon will run as (it must be started by root regardless)
+PPS_UID = 250
+PPS_GID = 250
+
+# Users belonging to the following group can delete jobs they did not submit
+OPERATOR_GID = 100
+
+# The user that your web server runs as
+HTTPD_UID = nobody
+
+# What is the root directory of your MiniSQL installation
+MSQLPATH = /usr/local/Hughes
+
+# You can set limits on the growth of log files using these values.  For instance, you may specify that the error logs are
+# not to grow beyond 10MB in size by setting TRIM_ERROR_LOG_AT = 10*1024 (measured in kilobytes).  When the error log is
+# then trimmed, it will be shortened to the size given by TRIM_ERROR_LOG_TO, by keeping only that portion of the tail of
+# the log file.  The same goes for the print log file.  If you set the trim at size to be zero, or set an "AT" to be less
+# than or equal to a corresponding "TO", the logs will grow unchecked. 
+TRIM_PRINT_LOG_AT = 0
+TRIM_PRINT_LOG_TO = 0
+TRIM_ADMIN_LOG_AT = 0
+TRIM_ADMIN_LOG_TO = 0
+TRIM_ERROR_LOG_AT = 1024
+TRIM_ERROR_LOG_TO = 512
+
+# If you set your log sizes high, or leave them unchecked, but still want to ensure that they never cause a disk to fill,
+# you can specify the maxmimum amount of free space (in kilobytes) on the disk to which logs are written, at which point,
+# logging will no longer be performed.
+STOP_LOGGING_AT = 20480
+
+
+##################################################
+# PRINT DRIVER SETTINGS (Can safely be left as is)
+
+# PJL COMPATIBLE PRINT DRIVER
+
+# Minutes before we give up on a print job if we still cannot connect to the printer
+# and begin printing (zero to never give up)
+PJL_CONNECT_RETRY_TIMEOUT = 60
+
+# Minutes we spend trying to reset the printer's display after we have printed a job
+# (zero to never give up, until we succeed or another job tries to print)
+PJL_PRINTER_RESET_TIMEOUT = 60
+
+# Seconds before we assume an unresponding connection was lost
+# (setting this to printer's internal timeout value would make sense)
+# (zero to never timeout -- probably not a good idea)
+PJL_INACTIVITY_TIMEOUT = 30
+
+# Seconds we wait between failed attempts to connect to the printer
+PJL_CONNECT_RETRY_INTERVAL = 15
+
+
+######################################
+# SETTINGS FOR DEBUGGING PURPOSES ONLY
+
+TRIM_DEBUG_LOG_AT = 10240
+TRIM_DEBUG_LOG_TO = 2048
+
+
+############################
+# FROM HERE ON, DO NOT TOUCH
+
+PROGS = ppd ppr ppq pprm
+PRINT_DRIVERS = printer/pjl_jetdirect.o printer/generic.o
+
+CC = @CC@
+LIBS = @LIBS@
+LDFLAGS = @LDFLAGS@
+
+
+UIDFLAGS = -DPPS_UID=$(PPS_UID) -DPPS_GID=$(PPS_GID) -DOPERATOR_GID=$(OPERATOR_GID)
+
+LOGFLAGS = -DTRIM_DEBUG_LOG_AT=$(TRIM_DEBUG_LOG_AT) -DTRIM_DEBUG_LOG_TO=$(TRIM_DEBUG_LOG_TO) \
+-DTRIM_ERROR_LOG_AT=$(TRIM_ERROR_LOG_AT) -DTRIM_ERROR_LOG_TO=$(TRIM_ERROR_LOG_TO) \
+-DTRIM_PRINT_LOG_AT=$(TRIM_PRINT_LOG_AT) -DTRIM_PRINT_LOG_TO=$(TRIM_PRINT_LOG_TO) \
+-DTRIM_ADMIN_LOG_AT=$(TRIM_ADMIN_LOG_AT) -DTRIM_ADMIN_LOG_TO=$(TRIM_ADMIN_LOG_TO) \
+-DSTOP_LOGGING_AT=$(STOP_LOGGING_AT)
+
+PJLFLAGS = -DPJL_CONNECT_RETRY_TIMEOUT=$(PJL_CONNECT_RETRY_TIMEOUT) -DPJL_PRINTER_RESET_TIMEOUT=$(PJL_PRINTER_RESET_TIMEOUT) \
+-DPJL_INACTIVITY_TIMEOUT=$(PJL_INACTIVITY_TIMEOUT) -DPJL_CONNECT_RETRY_INTERVAL=$(PJL_CONNECT_RETRY_INTERVAL)
+
+#CFLAGS = -O -I. -I./msql @MSQL_H_PATH@ @DEFS@ -DDEBUG_STDERR -DROOT=\"@prefix@\" $(UIDFLAGS) $(LOGFLAGS) $(PJLFLAGS)
+CFLAGS = -O -I. -I./msql @MSQL_H_PATH@ @DEFS@ -DROOT=\"@prefix@\" $(UIDFLAGS) $(LOGFLAGS) $(PJLFLAGS)
+
+INSTALL = @INSTALL@
+
+all : $(PROGS)
+	cd hooks; make
+	cd web; make
+	cd web_user; make
+
+ppd : ppd.o $(PRINT_DRIVERS) filesystem.o notify.o locking.o logging.o msql/database.o
+	$(CC) -o ppd $(LDFLAGS) ppd.o $(PRINT_DRIVERS) filesystem.o notify.o locking.o logging.o msql/database.o $(LIBS)
+ppr : ppr.o notify.o locking.o logging.o
+	$(CC) -o ppr $(LDFLAGS) ppr.o notify.o locking.o logging.o msql/database.o $(LIBS)
+ppq : ppq.o locking.o msql/database.o
+	$(CC) -o ppq $(LDFLAGS) ppq.o locking.o msql/database.o $(LIBS)
+pprm : pprm.o notify.o locking.o
+	$(CC) -o pprm $(LDFLAGS) pprm.o notify.o locking.o msql/database.o $(LIBS)
+#pqm : pqm.o
+#	$(CC) -o pqm pqm.o -lncurses -lm
+#pqmd : pqmd.o
+
+ppd.o : ppd.c pps.h
+ppr.o : ppr.c pps.h
+ppq.o : ppq.c pps.h
+pprm.o : pprm.c pps.h
+#pqm.o : pqm.c pps.h
+#pqmd.o : pqmd.c pps.h
+
+printer/generic.o : printer/generic.c printer/generic.h pps.h
+	$(CC) -c -o printer/generic.o $(CFLAGS) printer/generic.c
+printer/pjl_jetdirect.o : printer/pjl_jetdirect.c printer/pjl_jetdirect.h pps.h
+	$(CC) -c -o printer/pjl_jetdirect.o $(CFLAGS) printer/pjl_jetdirect.c
+
+locking.o : locking.c pps.h
+logging.o : logging.c ppd.h pps.h
+notify.o : notify.c pps.h
+
+msql/database.o : msql/database.c
+	$(CC) -c -o msql/database.o $(CFLAGS) msql/database.c
+
+install: all
+	$(INSTALL) -m 0755 -o $(PPS_UID) -g $(PPS_GID) -d @prefix@
+	$(INSTALL) -m 0755 -o $(PPS_UID) -g $(PPS_GID) -d @prefix@/bin
+	$(INSTALL) -m 0550 -o $(HTTPD_UID) -g $(PPS_GID) -d @prefix@/web_bin
+	$(INSTALL) -m 0550 -o $(HTTPD_UID) -g $(PPS_GID) -d @prefix@/web_bin/pjl_jetdirect
+	$(INSTALL) -m 0550 -o $(HTTPD_UID) -g $(PPS_GID) -d @prefix@/web_user
+	$(INSTALL) -m 0700 -o $(PPS_UID) -g $(PPS_GID) -d @prefix@/web_bin/html
+	$(INSTALL) -m 0700 -o $(PPS_UID) -g $(PPS_GID) -d @prefix@/spool
+	$(INSTALL) -m 0700 -o $(PPS_UID) -g $(PPS_GID) -d @prefix@/logs
+	$(INSTALL) -m 0500 -o root -g root -s ppd @prefix@/bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s ppr @prefix@/bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s ppq @prefix@/bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s pprm @prefix@/bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/add_printer.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/add_queue.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/add_user.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/continue_add_printer.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/continue_add_queue.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/continue_add_user.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/show_printer.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/show_queue.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/show_setup.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/show_user.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/update_queue.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/update_user.cgi @prefix@/web_bin
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/user_menu.cgi @prefix@/web_bin
+	$(INSTALL) -m 0550 -o $(HTTPD_UID) -g $(PPS_GID) web/index.html @prefix@/web_bin
+	$(INSTALL) -m 0500 -o $(PPS_UID) -g $(PPS_GID) web/html/show_setup.html @prefix@/web_bin/html
+	$(INSTALL) -m 0500 -o $(PPS_UID) -g $(PPS_GID) web/html/user_menu.html @prefix@/web_bin/html
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/pjl_jetdirect/add_pjl_jetdirect.cgi @prefix@/web_bin/pjl_jetdirect
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/pjl_jetdirect/continue_add_pjl_jetdirect.cgi @prefix@/web_bin/pjl_jetdirect
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/pjl_jetdirect/show_pjl_jetdirect.cgi @prefix@/web_bin/pjl_jetdirect
+	$(INSTALL) -m 6555 -o $(PPS_UID) -g $(PPS_GID) -s web/pjl_jetdirect/update_pjl_jetdirect.cgi @prefix@/web_bin/pjl_jetdirect
+	$(INSTALL) -m 0550 -o $(HTTPD_UID) -g $(PPS_GID) web_user/default.cgi web_user/default.html @prefix@/web_user
+	$(INSTALL) -m 6555 -o root -g root -s web_user/user_request.cgi @prefix@/web_user
+#	if \
+#		test ! -e @prefix@/.qmpipe ; \
+#	then \
+#		mknod -m 0600 @prefix@/.qmpipe p ; \
+#		chown pps @prefix@/.qmpipe ; \
+#		chgrp pps @prefix@/.qmpipe ; \
+#	fi
+
+database:
+	@MAKE_DATABASE@
+	@MSQLADMIN@ create pps
+	msql/add_to_msql.acl.sh $(MSQLPATH)
+	@MSQLADMIN@ reload
+	@MSQLPROG@ pps <msql/create_tables.msql
+
+installman:
+	$(INSTALL) -m 644 -o root -g root ../man/man1/ppr.1 @mandir@/man1
+	$(INSTALL) -m 644 -o root -g root ../man/man1/ppq.1 @mandir@/man1
+	$(INSTALL) -m 644 -o root -g root ../man/man1/pprm.1 @mandir@/man1
+	$(INSTALL) -m 644 -o root -g root ../man/man8/ppd.8 @mandir@/man8
+
+clean :
+	-rm -f $(PROGS) *.o printer/*.o msql/*.o
+	-cd hooks; make clean
+	-cd web; make clean
+	-cd web_user; make clean
+

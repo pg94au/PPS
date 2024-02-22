@@ -1,0 +1,57 @@
+.TH PPR 1 "29 Sep 1998" "PPS Reference Manual" "PPS Reference Manual"
+.SH NAME
+ppr \- submit a job to be printed
+.SH SYNOPSIS
+.B ppr
+.BI \-[qP] queue
+[
+.BI \-u usercode
+]
+.I filename
+.SH DESCRIPTION
+.B Ppr
+is the client portion of the PPS Printing System which is used to submit
+jobs to be printed by the
+.BR ppd (8)
+print spooling daemon.  If there is more than one printer attached to the
+queue selected,
+.BR ppd (8)
+will select the printer on which the job is output.
+
+The
+.B ppr
+client automatically creates a duplicate of the submitted job into its spool
+area.  While this does mean that a file, once submitted can immediately be
+deleted, it also means that there must be enough free disk space in the spool
+directory for the complete file to be stored.
+.SH OPTIONS
+.TP
+.BI -[qP] queue
+The name of the queue to which the job is to be submitted.  The
+.B \-q
+switch is the one intended for this argument, but
+.B \-P
+can be used equivalently, for a more BSD-like interface.
+.TP
+.BI -u user
+The name of the user to whom ownership of this job is to be assigned.  This
+argument can only be used by root, or by the user under whose id the
+.B ppd\c
+(8)
+daemon runs.  The job will be charged to the account of the specified user,
+and logged as printed by that user.
+.SH LIMITATIONS
+Although
+.B ppr
+is not intended to duplicate all of the functionality of
+.B lpr\c
+(1), a few of its features would be desirable.  Two major ones are the
+abilities to specify multiple filename arguments, and to accept a job from
+stdin if no filename argument is given.  A third might be to allow the option
+of not having the entire file duplicated into the spool directory upon
+submission.
+.SH AUTHOR
+Paul Grebenc <paul@ed.brocku.ca>
+.SH "SEE ALSO"
+ppq(1), pprm(1), ppd(8)
+

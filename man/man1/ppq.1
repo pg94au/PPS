@@ -1,0 +1,162 @@
+.TH PPQ 1 "29 Sep 1998" "PPS Reference Manual" "PPS Reference Manual"
+.SH NAME
+ppq \- queue/printer examination program
+.SH SYNOPSIS
+.B ppq
+[ [\c
+.BI \-[qP] queue\c
+ [[\c
+.BI \-p printer\c
+]
+[\c
+.BI \-u usercode\c
+]
+[\c
+.B \-v\c
+]]] |
+.RS 6
+[\c
+.BI \-[qP] queue\c
+ [\c
+.BI \-p printer\c
+]
+.B \-V\c
+] |
+.RE
+.RS 6
+[[\c
+.BI \-P queue\c
+]
+.B \-b\c
+] ]
+.RE
+.SH DESCRIPTION
+.B Ppq
+is the client portion of the PPS Printing System which is used to examine
+the current status of jobs queued to be printed by the
+.BR ppd (8)
+print spooling daemon.
+
+.B Ppq
+has three modes of use.  It's main purpose is to allow the user to examine the
+contents and state of specific queues and printers on the system.  It can also
+be used to view the status, descriptions, and charges applicable to any queue
+or printer.  Finally, for a limited amount of backward compatibility, there
+is a BSD
+.BR lpq (1)
+mode.
+
+The three modes of operation of
+.B ppq
+are distinct, in that not all switches accepted can be used in
+conjunction with each other.
+.SS "Examining Current Queue/Printer Status"
+Accepts switches
+.B -q\c
+,
+.B -P\c
+,
+.B -p\c
+,
+.B -u
+and
+.B -v\c
+, and displays the current state of the queue and printers selected.
+This includes both the activity of the queue and its printers, as well as a
+list of jobs waiting in the queue, if any exist.
+.SS "Examining Queue/Printer Descriptions and Charges
+Accepts switches
+.B -q\c
+,
+.B -P\c
+,
+.B -p
+and
+.B -V\c
+, and displays a list of the configuration state of the queue specified.
+The required switch to enable this mode is
+.BR -V .
+For the queue, this includes its availability, given description, and any
+charges applicable for users printing to it.  A list of all printers attached
+to the queue is then given, including their respective availabilities and
+descriptions.
+.SS "BSD-Compatibility Mode"
+Accepts switches
+.B -P
+and
+.B -b\c
+, and displays BSD
+.BR lpq (1)\c
+ like output.  The required switch to enable this mode is
+.BR -b .
+Queue selection is specified using the
+.B -P
+argument, as with
+.BR lpq (1).
+If not specified, the default queue is "lp".  This is
+a limited compatibility mode, provided only to satisfy programs which interface
+with the print spooling system and which can understand only
+.BR lpq (1)
+output when examining a queue's status.
+.SH OPTIONS
+.SS "Examining Current Queue/Printer Status"
+.TP
+.BI -[qP] queue
+The name of the queue to be examined.  The
+.B \-q
+switch is the one intended for this argument, but
+.B \-P
+can be used equivalently, for a more BSD-like interface.
+.TP
+.BI -p printer
+The name of the only printer attached to the specified queue that is to be
+examined.  If this argument is given when examining a queue with multiple
+printers attached to it, only the single printer specified will be reported.
+.TP
+.BI -u user
+If specified, only jobs which are owned by the user given by this argument
+will be reported.
+.TP
+.BI -v
+Turns on verbose output mode.  In verbose mode, the state of inactive printers
+is also given.  As well, the absence of waiting jobs in the queue is 
+explicitly reported.
+.SS "Examining Queue/Printer Descriptions and Charges"
+.TP
+.BI -[qP] queue
+The name of the queue to be examined.  The
+.B \-q
+switch is the one intended for this argument, but
+.B \-P
+can also be used equivalently.
+.TP
+.BI -p printer
+If specified, only the description of this printer, attached to the given
+queue, will be reported.
+.TP
+.B -V
+This switch causes the queue and printer descriptions to be output, as
+opposed to giving the current state of jobs queued or printing.
+.SS "BSD-Compatilibity Mode"
+.TP
+.BI -P queue
+Specify a particular queue, otherwise the default "lp" is used.
+.TP
+.B -b
+Enables Berkeley
+.BR lpq (1)
+output mode.
+.SH LIMITATIONS
+The Berkeley
+.BR lpq (1)
+compatibility mode is not fully compatible.  It will only accept the arguements
+described in this document.  This is not likely to change, as the compatibility
+mode is only included as a crutch for programs which interface with the print
+spooler and expect
+.BR lpq (1)
+output.
+.SH AUTHOR
+Paul Grebenc <paul@ed.brocku.ca>
+.SH "SEE ALSO"
+ppr(1), pprm(1), ppd(8)
+

@@ -1,0 +1,51 @@
+<HTML>
+<HEAD>
+   <TITLE>Print Accounting System - User Menu</TITLE>
+   <META NAME="Author" CONTENT="Paul Grebenc">
+   <META NAME="GENERATOR" CONTENT="Mozilla/3.0Gold (WinNT; I) [Netscape]">
+   <!-- $Header: /usr/local/PPS_RCS/src/web/html/user_menu.html,v 1.1 1999/12/10 03:27:48 paul Exp $ -->
+</HEAD>
+<BODY TEXT="#FFFFFF" BGCOLOR="#000080" LINK="#0000FF" VLINK="#0000FF" ALINK="#0000FF">
+
+<CENTER><P><B><FONT COLOR="#FFFFFF"><FONT SIZE=+2>PRINT ACCOUNTING SYSTEM</FONT></FONT></B></P></CENTER>
+
+<CENTER><P><FONT COLOR="#C0C0C0">USER MENU</FONT></P></CENTER>
+
+<CENTER><P><BR>
+</P></CENTER>
+
+<CENTER>
+<FORM METHOD=POST ACTION=add_user.cgi?GET>
+<INPUT TYPE=SUBMIT NAME="ACTION" VALUE="ADD A NEW USER">
+</FORM>
+
+<BR>
+<HR>
+<BR>
+<BR>
+
+<FORM METHOD=POST ACTION=show_user.cgi>
+<TABLE BORDER=1><TR><TD>Enter account name of user</TD><TD><INPUT NAME="usercode1" SIZE=8 MAXLENGTH=8></TD></TR></TABLE><BR>
+-- OR --<BR>
+<BR>
+<TABLE BORDER=1><TR>
+<TD>Select real name of user</TD>
+<TD><SELECT NAME="usercode2"><OPTION>
+<>
+</SELECT>
+</TD></TR></TABLE>
+<BR>
+
+<INPUT TYPE=SUBMIT NAME="ACTION" VALUE="UPDATE OR REMOVE USER">
+
+</FORM>
+
+</CENTER>
+
+<BR>
+<HR>
+
+<CENTER><P><FONT COLOR="#C0C0C0"><FONT SIZE=-2>(C)1997,1998 Paul Grebenc</FONT></FONT></P></CENTER>
+
+</BODY>
+</HTML>

@@ -1,0 +1,34 @@
+.TH PPD 8 "29 Sep 1998" "PPS Reference Manual" "PPS Reference Manual"
+.SH NAME
+ppd \- print spool daemon for PPS Printing System
+.SH SYNOPSIS
+.B ppd
+.SH DESCRIPTION
+.B Ppd
+is the server portion of the PPS Printing System which is normally executed
+at boot time from the
+.BR rc (8)
+file.  It is responsible for the actual printing of files, page accounting
+and logging that occurs in the PPS printing system.
+
+Although the
+.B ppd
+daemon operates under a user id specified at compile time, it must be invoked
+by root in order to begin running.  Upon invokation, it will immediately print
+out any jobs which were left behind in its spool directories after a crash.
+
+The setup and configuration of queues, printers and user accounts is done
+via the world wide web interface which is configured at the time of
+installation.  There are no plain text configuration files to be found.
+.SH LIMITATIONS
+Because it does not automatically detatch itself from its invoking shell, it
+should be started as a background process.
+
+Should a queue ever stall due to some unforeseen event, leaving queued jobs
+waiting but unhandled, it will never 'get around' to them again until a new
+job is submitted to that stalled queue.  This will be fixed soon.
+.SH AUTHOR
+Paul Grebenc <paul@ed.brocku.ca>
+.SH "SEE ALSO"
+ppr(1), ppq(1), pprm(1)
+

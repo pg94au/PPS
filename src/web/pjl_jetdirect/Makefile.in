@@ -1,0 +1,23 @@
+# $Header: /usr/local/PPS_RCS/src/web/pjl_jetdirect/Makefile.in,v 1.1 1999/12/10 03:32:30 paul Exp $
+
+CC = @CC@
+LIBS = @LIBS@
+LDFLAGS = @LDFLAGS@
+
+CFLAGS = -O -I.. -I../.. -I../../msql @MSQL_H_PATH@ @DEFS@ -DROOT=\"@prefix@\"
+
+all : add_pjl_jetdirect.cgi continue_add_pjl_jetdirect.cgi show_pjl_jetdirect.cgi update_pjl_jetdirect.cgi
+
+add_pjl_jetdirect.cgi : add_pjl_jetdirect.o ../../msql/database.o ../parse.o ../../pps.h
+	$(CC) -o add_pjl_jetdirect.cgi $(LDFLAGS) add_pjl_jetdirect.o ../../msql/database.o ../parse.o $(LIBS)
+continue_add_pjl_jetdirect.cgi : continue_add_pjl_jetdirect.o ../../locking.o ../../notify.o ../../msql/database.o ../parse.o ../../pps.h
+	$(CC) -o continue_add_pjl_jetdirect.cgi $(LDFLAGS) continue_add_pjl_jetdirect.o ../../locking.o ../../notify.o ../../msql/database.o ../parse.o $(LIBS)
+
+show_pjl_jetdirect.cgi : show_pjl_jetdirect.o ../../msql/database.o ../../pps.h
+	$(CC) -o show_pjl_jetdirect.cgi $(LDFLAGS) show_pjl_jetdirect.o ../../msql/database.o ../parse.o $(LIBS)
+update_pjl_jetdirect.cgi : update_pjl_jetdirect.o ../../msql/database.o ../../locking.o ../../notify.o ../../pps.h
+	$(CC) -o update_pjl_jetdirect.cgi $(LDFLAGS) update_pjl_jetdirect.o ../../msql/database.o ../../locking.o ../../notify.o ../parse.o $(LIBS)
+
+clean :
+	-rm *.cgi *.o
+

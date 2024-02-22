@@ -1,0 +1,65 @@
+# create_tables.msql
+#
+# Table descriptions required to create tables in pps database used by the printing system.
+# This description file was created by msqldump.
+#
+# Table descriptions (c)1997,1998 Paul Grebenc
+#
+# $Header: /usr/local/PPS_RCS/src/msql/create_tables.msql,v 1.1 1999/12/10 03:24:55 paul Exp $
+
+
+#
+# mSQL Dump  (requires mSQL 2.0 Beta 5 or newer)
+#
+# Host: localhost    Database: pps
+#--------------------------------------------------------
+
+
+#
+# Table structure for table 'queues'
+#
+CREATE TABLE queues (
+  type INT,
+  charge REAL,
+  name CHAR(32),
+  description CHAR(64),
+  status INT,
+  keyval INT NOT NULL
+) \g
+
+
+#
+# Table structure for table 'printers'
+#
+CREATE TABLE printers (
+  type INT,
+  name CHAR(32),
+  description CHAR(64),
+  queue INT,
+  status INT,
+  keyval INT NOT NULL
+) \g
+
+
+#
+# Table structure for table 'users'
+#
+CREATE TABLE users (
+  usercode CHAR(8) NOT NULL,
+  name CHAR(64),
+  id INT,
+  notes CHAR(80),
+  balance REAL,
+  status INT
+) \g
+
+
+#
+# Table structure for table 'pjl_jetdirect'
+#
+CREATE TABLE pjl_jetdirect (
+  address CHAR(256),
+  port INT,
+  keyval INT NOT NULL
+) \g
+

@@ -1,2 +1,6 @@
 # PPS
 Paul's Printing System (an LPR-inspired printing system which supports page accounting)
+
+This was originally a 4th year independent university project to build something to address the need for resource accounting (charging per laser-printed printed page) in student labs in the department of the university where I was also working part-time.  We started off using the commercial ncounter for Netware, then wished to abandon Netware for Linux and were stuck with a dependency on ncounter, which inspired this project.  It was built to be similar in nature to the traditional UNIX lpr/lpd, but with a back-end that supported page-counting for printers that supported HP's PJL Print Job Language.  It ended up primarily being used by students who would print from Windows systems via samba's printing support.  It ended up in use in our labs for several years (I'm not even sure for how long).
+
+Although this was originally developed for Linux, when I later discovered autoconf I adapted it to support some other UNIX operating systems.  It has not been touched since the year 2000.  (Needless to say, this is here as a historical record, so don't try to use this as is in a real environment today.  If for no other reason, there is a CGI-based web interface for account/balance management that was written with no consideration for SQL-injection attacks.)
